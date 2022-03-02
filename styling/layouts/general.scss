@@ -1,0 +1,31 @@
+html, body {
+	margin: 0; 
+	padding: 0; 
+}
+
+html {
+
+	font-size: 90%;
+
+	@media (min-width : $breakpoint-bax) {
+		font-size: 100%;
+	}
+}
+
+body {
+	background: white;
+	padding-top: 60px;
+	width: 100vw;
+	overflow-x: hidden;
+ }
+
+.noscript { display: none; }
+
+main {
+	width: 100vw;
+	//overflow-x: hidden;
+	position: relative;
+	display: flex;
+	flex-flow: column wrap;
+	align-items: center;
+}

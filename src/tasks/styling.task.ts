@@ -1,12 +1,10 @@
-import fs from "fs";
-import glob from "glob";
-import sass from 'node-sass';
+import { MaintenanceController } from "../maintenance/maintenance.controller";
+const maintenanceController = new MaintenanceController();
 
-const fsPromises = fs.promises;
-const distdir = "../dist";
-const builddir = "./build";
-
-export class MaintenanceController {
-
-
-}
+maintenanceController.compileStyling()
+    .then((pages: any) => {
+        process.exit(0);
+    })
+    .catch((error: any) => {
+        process.exit(1);
+    });

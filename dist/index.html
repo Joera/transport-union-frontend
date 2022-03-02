@@ -1,0 +1,78 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Public Record DAO - subscription</title>
+  <meta name="description" content="Form to subscribe to services from the Puiblic Record DAO">
+  <meta name="author" content="Joera Mulders">
+
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<!-- 
+
+    id
+    slug
+    contract
+    topics
+
+    .widget_domain, 
+    sub.widget_version,
+-->
+
+<body>
+    <section class="small-container">
+
+        <form id="rsvpform" class="form"> <!--  -->
+
+            <div class="field-wrapper half" style="display:none">
+                <input type="text" id="token" name="token">
+            </div>
+
+            <div class="field-wrapper full">
+                <label for="name">Unique name <strong aria-hidden="true">*</strong></label>
+                <input type="text" id="name" name="name" required aria-required="true">
+            </div>
+            <div class="field-wrapper full">
+                <label for="contract">Network <strong aria-hidden="true">*</strong></label>
+                <input type="text" id="network" name="network" required aria-required="true">
+            </div>
+            <div class="field-wrapper full">
+                <label for="contract">Contract <strong aria-hidden="true">*</strong></label>
+                <input type="text" id="contract" name="contract" required aria-required="true">
+            </div>
+
+            <!-- use ABI to select topics --> 
+            <!-- textarea ... then parse ... then select -->
+            <div class="field-wrapper full">
+                <label for="abi">Contract ABI <strong aria-hidden="true">*</strong></label>
+                <textarea type="text" id="abi" name="abi" rows=6"  required aria-required="true" aria-describedby=""></textarea>
+                <button id="abi_parse_button" type="button">Parse</button>
+            </div>
+
+
+            <!-- <div class="field-wrapper full">
+                <label for="topics">Topic 1 <strong aria-hidden="true">*</strong></label>
+                <input type="text" id="topics" name="topics" required aria-required="true" aria-describedby="">
+            </div>
+            <div class="field-wrapper full">
+                <label for="topics">Topic 1 <strong aria-hidden="true">*</strong></label>
+                <input type="text" id="topics" name="topics" required aria-required="true" aria-describedby="">
+            </div> -->
+            <div class="field-wrapper full">
+                <span class="radio">
+                    <input type="radio" id="none" name="services" value="widget">
+                    <label for="widget">Widget</label>
+                </span>
+            </div>
+        </form>
+    </section>
+
+
+  <script src="./scripts.js"></script>
+</body>
+</html>
