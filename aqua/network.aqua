@@ -1,0 +1,51 @@
+import Op, Peer, Kademlia, PeerId, Srv, Service, Info from "@fluencelabs/aqua-lib/builtin"
+
+func getNeighborhood(relay: string) -> []PeerId:
+
+    -- relay = HOST_PEER_ID
+
+    connectedPeers: *string
+
+    on relay:
+
+        already_hashed: ?bool
+        count: ?u32
+        count <<- 64
+
+        peers <- Kademlia.neighborhood(relay,already_hashed,count)
+
+    <- peers
+
+func isConnected(peer: PeerId) -> bool:
+
+    connection: ?string
+    connected: ?bool
+    on peer:
+
+        Op.noop()
+        connection <<- peer
+    par connection <- Peer.timeout(300, "timeout")
+    join connection[0]
+
+    if connection[0] != "timeout":
+        connected <<- true
+    else: 
+        connected <<- false 
+
+    <- connected[0]
+
+func listServices(peer: string) -> []Service : 
+
+    on peer: 
+
+        list <- Srv.list()
+
+    <- list
+
+func getPeerInfo(peer: string) -> Info : 
+
+    on peer: 
+
+        info <- Peer.identify()
+
+    <- info 
