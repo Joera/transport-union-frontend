@@ -1,3 +1,8 @@
 node_modules/ 
 package-lock.json
-_*
+_cacache
+_logs
+_update-*
+build/*
+public/*
+
