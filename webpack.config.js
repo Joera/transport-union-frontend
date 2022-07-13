@@ -8,38 +8,45 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const isProduction = process.env.NODE_ENV == "production";
 
 const config = {
-  entry: "./src/main.controller.ts",
+  entry: ["./src/main.controller.ts","./styling/main.scss"],
   output: {
     path: path.resolve(__dirname, "public/"),
     chunkFilename: 'scripts.js',
     filename: 'scripts.js',
-    assetModuleFilename: (pathData) => {
-      const filepath = path
-          .dirname(pathData.filename)
-          .split("/")
-          .slice(1)
-          .join("/");
-      return `./styling/${filepath}/[name].[hash][ext][query]`;
-    },
+    // assetModuleFilename: (pathData) => {
+    //   const filepath = path
+    //       .dirname(pathData.filename)
+    //       .split("/")
+    //       .slice(1)
+    //       .join("/");
+    //   return `./styling/${filepath}/[name].[hash][ext][query]`;
+    // },
   },
-  devServer: {
-    open:true,
-    port: 3000,
-    hot: true,
-    client: {
-      overlay: true,
-      progress: true,
-      reconnect: true,
-    },
-  },
+  // devServer: {
+  //   open:true,
+  //   port: 3000,
+  //   hot: true,
+  //   client: {
+  //     overlay: true,
+  //     progress: true,
+  //     reconnect: true,
+  //   },
+  // },
   devtool:'source-map',
   plugins: [
       new MiniCssExtractPlugin({
-        filename: "./styling/main.scss"
+        filename: "styles.css"
       }),
+      // new CopyWebpackPlugin({
+      //   patterns: [
+      //       { from: 'static' }
+      //   ]
+      // }),
       new CopyWebpackPlugin({
         patterns: [
-            { from: 'static' }
+          'node_modules/@fluencelabs/avm/dist/avm.wasm',
+          'node_modules/@fluencelabs/marine-js/dist/marine-js.wasm',
+          'node_modules/@fluencelabs/marine-js/dist/marine-js.web.js'
         ]
       }),
       new webpack.ProvidePlugin({
