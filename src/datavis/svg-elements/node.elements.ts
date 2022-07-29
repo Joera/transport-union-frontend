@@ -41,21 +41,21 @@ export default class NodeElements  {
         //     if( n != undefined && (n.role  === "peer" || n.role === "relayPeer")) return g;
         // });
 
-        // console.log(nodes);
+        // console.log(chords);
 
         this.ctrlr.svg.layers.data.select("g.nodes")
             .selectAll("path.node")
-            .data(nodes, (d: any) => {
+            .data(chords, (d: any) => {
 
                 console.log(d);
-                return matchPeerSlugByIndex(d.id);
+                return matchPeerSlugByIndex(d.index);
             })
             .join(
                 (enter : any) => {
 
                     enter
                         .append("path")
-                        .attr("class", (d:any) =>  "node " + matchPeerSlugByIndex(d.id))
+                        .attr("class", (d:any) =>  "node " + matchPeerSlugByIndex(d.index))
                         .attr("stroke", "#fff")
                         .attr("fill", (d: any) => {
 
