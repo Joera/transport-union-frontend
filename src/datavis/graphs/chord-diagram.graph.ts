@@ -3,21 +3,24 @@ import { GraphNode, GraphLink, NetworkData} from "../../interfaces"
 import * as d3 from "d3";
 
 import { ChartObjects, ChartSVG, ChartDimensions, ChartScale, ChartAxes } from '../chart-basics/module';
-import { ChordElements, NodeElements, SateliteElements, ConnectionElements } from "../chart-elements/module";
+import { ChordElements, NodeElements, SateliteElements, ConnectionElements } from "../svg-elements/module";
 import { BaseType, SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import { Dimensions } from "../types/dimensions";
 import { FluencePeer } from "@fluencelabs/fluence";
-import { Simulation } from "../chart-elements/simulation";
+import { Simulation } from "../svg-elements/simulation";
 import { AnyRecord } from "dns";
-import { CircularThings } from "../chart-elements/circular-things";
+import { CircularThings } from "../svg-elements/circular-things";
 import { matchPeerSlug } from "../helpers/peers";
 import { slugify } from "../utils/slugify.utils";
 
 import { HtmlPopup } from "../html-elements/html-popup";
+import { GraphControllerV3 } from "./graph-v3";
+import { GraphData } from "../types/data";
 
-export default class ChordDiagramGraph {
+export default class ChordDiagramGraph extends GraphControllerV3 {
 
     // localPeer: FluencePeer;
+   
     element: HTMLElement;
     // yParameter;
     dimensions: any;
@@ -38,67 +41,72 @@ export default class ChordDiagramGraph {
     sateliteCircle: any;
     popup: any;
 
-    config = {
-        "graphType": "ChordDiagram",
-        "xScaleType" : false,
-        "yScaleType" : false,
-        "xParameter" : false,
-        "yParameter" : false,
-        "padding": {
-            "top": 0,
-            "bottom": 0,
-            "left": 0,
-            "right": 0
-        },
-        "margin": {
-            "top": 0,
-            "bottom": 0,
-            "left": 0,
-            "right": 0
-        },
-        "extra" :{}
-    }
+    // config = {
+    //     // "graphType": "ChordDiagram",
+    //     // "xScaleType" : false,
+    //     // "yScaleType" : false,
+    //     // "xParameter" : false,
+    //     // "yParameter" : false,
+    //     "padding": {
+    //         "top": 0,
+    //         "bottom": 0,
+    //         "left": 0,
+    //         "right": 0
+    //     },
+    //     "margin": {
+    //         "top": 0,
+    //         "bottom": 0,
+    //         "left": 0,
+    //         "right": 0
+    //     },
+    //     "parameters" :[],
+    //     "scales" : [],
+    //     "axes": []
+    // }
 
     constructor(
-        private mainController: any,
-        private elementID: string,
+        public main: any,
+        public elementId: string,
     ){
-        this.element = d3.select('#' + elementID).node() as HTMLElement;
+        super(main,elementId)
+        this.init();
     }
 
     init() {
 
         let self = this;
 
-        let chartObjects = ChartObjects();
-        this.config = Object.assign(chartObjects.config(),this.config);
-        this.dimensions = chartObjects.dimensions();
-        this.svg = chartObjects.svg();
+        super._init();
 
-        // get dimensions from parent element
-        this.chartDimensions = new ChartDimensions(this.element, this.config);
-        this.dimensions = this.chartDimensions.get(this.dimensions);
+        const svgId = "svg-wrapper-chords"; // + this.mapping.slug
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'row';
+        container.style.justifyContent = 'center';
+        container.style.alignItems = 'center';
+        container.style.width = "100%";
+        // container.style.maxWidth = "400px"
+        container.style.height = "100%";
+        container.id = svgId;
+        this.element.appendChild(container);
 
-        // create svg elements without data
-        this.chartSVG = new ChartSVG(this.element, this.config, this.dimensions, this.svg);
-
-        // get dimensions from parent element
-        this.chartDimensions = new ChartDimensions(this.element, this.config);
-        this.dimensions = this.chartDimensions.get(this.dimensions);
-
-        this.nodeElements = new NodeElements(this.mainController, this);
-        this.sateliteElements = new SateliteElements(this.mainController, this);
-        this.chordElements = new ChordElements(this.mainController, this);
-        this.connectionElements = new ConnectionElements(this.mainController, this);
+        super._svg(container);
 
         this.coreCircle = new CircularThings(this, 70,"core");
-        this.sateliteCircle = new CircularThings(this, 0,"satelite");
 
-        this.popup = new HtmlPopup(this);
+        this.nodeElements = new NodeElements(this.main, this);
+        // this.sateliteElements = new SateliteElements(this.main, this);
+        // this.chordElements = new ChordElements(this.main, this);
+        // this.connectionElements = new ConnectionElements(this.main, this);
+
+        
+        // this.sateliteCircle = new CircularThings(this, 0,"satelite");
+
+   //     this.popup = new HtmlPopup(this);
 
     }
 
-    prepareData(data: NetworkData)  {
+    prepareData()   {
 
      //   data.nodes = data.nodes.filter( (n) => n.peerId !== this.mainController.fluence.peerId)
       //  data.links = data.links.filter( (n) => n.source > 0 )
@@ -108,58 +116,59 @@ export default class ChordDiagramGraph {
         //     links: data.links
         // }
 
-        const index = new Map(data.nodes.map((n, i) => [n.peerId, i]));
-        data.matrix = Array.from(index, () => new Array(data.nodes.length).fill(0));
+        const nodes = this.main.graphData.nodes;
 
-        for (const {source, target} of data.links) {
+        const index = new Map(nodes.map((n: any, i: number) => [n.peerId, i]));
+        let matrix = Array.from(index, () => new Array(nodes.length).fill(0));
+
+        for (const {source, target} of this.main.graphData.links) {
             
             try {
-                data.matrix[source][target] = 1;
-                data.matrix[target][source] = 1;
+                matrix[source][target] = 1;
+                matrix[target][source] = 1;
             }
             catch {
                // console.log("probleem met link " + source + " " + target)
             }
         }
 
-    
-        this.coreCircle.resupply(data);
-        const coreChords = this.coreCircle.chord(data.matrix);
+        this.coreCircle.resupply(nodes);
+        const coreChords = this.coreCircle.chord(matrix);
 
-        this.sateliteCircle.resupply(data);
-        const sateliteChords = this.coreCircle.chord(data.matrix);
+        // this.sateliteCircle.resupply(networkData);
+        // const sateliteChords = this.coreCircle.chord(networkData.matrix);
 
-        return { data, sateliteChords, coreChords }; 
+        const data = { nodes, coreChords }; 
+
+        return data;
     }
 
-    draw(data: NetworkData, sateliteChords: any, coreChords: any) {
+    draw(data: any) {
 
-        this.nodeElements.draw(data, coreChords);
-        this.chordElements.draw(data, coreChords);
+        this.nodeElements.draw(data.nodes, data.coreChords);
+    //     this.chordElements.draw(data.networkData, data.coreChords);
 
-        this.sateliteElements.draw(data, sateliteChords);
+    //     this.sateliteElements.draw(data.networkData, data.sateliteChords);
 
-      //  this.popup.attachData(data)
+    //   //  this.popup.attachData(data)
 
-        setTimeout( () => {
-            this.connectionElements.draw(data, sateliteChords);
-        },1000)
+    //     setTimeout( () => {
+    //         this.connectionElements.draw(data.networkData, data.sateliteChords);
+    //     },1000)
         
     }
 
-    redraw(data: NetworkData) {
+    redraw(data: GraphData) {
 
-        this.dimensions = this.chartDimensions.get(this.dimensions);
-        this.chartSVG.redraw(this.dimensions);
+          super.redraw(data);
+          this.coreCircle.redraw();
+          this.nodeElements.redraw();
+        //   this.chordElements.redraw();
+        //   this.sateliteElements.redraw();
     }
-
-    update(_data: NetworkData) {
-
-        let self = this; 
-        let { data, sateliteChords, coreChords } = this.prepareData(_data);
-        this.draw(data, sateliteChords, coreChords );
-        this.redraw(data);
-        window.addEventListener("resize", () => self.redraw(data), false);
+  
+    update(data: GraphData, update: boolean) {
+        super._update(data,update);
     }
 
 

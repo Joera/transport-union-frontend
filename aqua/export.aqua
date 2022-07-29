@@ -1,4 +1,4 @@
 module Export
-import getNeighborhood, isConnected, listServices, getPeerInfo from "./network.aqua"
+import getNeighborhood, isConnected, listServices, getPeerInfo, getContact from "./network.aqua"
 import Peer from "@fluencelabs/aqua-lib/builtin.aqua"
-export getNeighborhood, isConnected, listServices, getPeerInfo
+export getNeighborhood, isConnected, listServices, getPeerInfo, getContact

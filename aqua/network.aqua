@@ -1,4 +1,4 @@
-import Op, Peer, Kademlia, PeerId, Srv, Service, Info from "@fluencelabs/aqua-lib/builtin"
+import Op, Peer, Kademlia, PeerId, Srv, Service, Info, Contact from "@fluencelabs/aqua-lib/builtin"
 
 func getNeighborhood(relay: string) -> []PeerId:
 
@@ -16,23 +16,37 @@ func getNeighborhood(relay: string) -> []PeerId:
 
     <- peers
 
-func isConnected(peer: PeerId) -> bool:
+  
 
-    connection: ?string
-    connected: ?bool
-    on peer:
+func isConnected(relay: PeerId, peer: PeerId) -> bool:
 
-        Op.noop()
-        connection <<- peer
-    par connection <- Peer.timeout(300, "timeout")
-    join connection[0]
+    -- connection: ?string
+    -- connected: ?bool
+    -- on peer:
 
-    if connection[0] != "timeout":
-        connected <<- true
-    else: 
-        connected <<- false 
+    --     Op.noop()
+    --     connection <<- peer
+    -- par connection <- Peer.timeout(7000, "timeout")
+    -- join connection[0]
 
-    <- connected[0]
+    -- if connection[0] != "timeout":
+    --     connected <<- true
+    -- else: 
+    --     connected <<- false 
+
+    on relay:
+
+        c <- Peer.is_connected(peer)
+
+    <- c
+
+func getContact(relay: PeerId, peer: PeerId) -> Contact: 
+
+    on relay: 
+
+        c <- Peer.get_contact(peer)
+
+    <- c
 
 func listServices(peer: string) -> []Service : 
 

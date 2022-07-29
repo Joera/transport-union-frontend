@@ -58,13 +58,13 @@ export default class SateliteElements  {
 
                                 let node = data.nodes.find((n:any) => n.id === d.index);
 
-                                if (node && node.role === "js-peer") {
-                                    return colours.orange[0]; 
-                                } else if (node && !node.connected) {
-                                    return colours.lightGrey[0]; 
-                                } else {
+                                // if (node && node.role === "js-peer") {
+                                //     return colours.orange[0]; 
+                                // } else if (node && !node.connected) {
+                                //     return colours.lightGrey[0]; 
+                                // } else {
                                     return colours.orange[0]; ; 
-                                }
+                                // }
                             } catch {
                                 return "#000"
                             }

@@ -19,5 +19,5 @@
         }
     },
     "include": [
-        "src/*", "src/**/*", "src/main.controller.ts" ]
+        "src/*", "src/**/*", "src/controllers/main.controller.ts" ]
 }

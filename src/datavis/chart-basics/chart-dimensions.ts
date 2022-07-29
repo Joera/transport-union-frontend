@@ -1,22 +1,33 @@
-import { BaseType } from "d3";
-import {Config } from "../types/graphConfig"
-import {Dimensions } from "../types/dimensions"
+import { Dimensions } from "../types/dimensions";
+import { GraphConfig, IGraphConfigV3 } from "../types/graphConfig";
 
-export class ChartDimensions {
+export interface IChartDimensions {
+    element: HTMLElement,
+    config: GraphConfig|IGraphConfigV3,
+    measure: (dimensions: Dimensions) =>  Dimensions
+}
 
-    dimensions: Dimensions
+export class ChartDimensions implements IChartDimensions {
+
+    element: HTMLElement;
+    config: GraphConfig|IGraphConfigV3;
+    dimensions: Dimensions;
 
     constructor(
-        private element: HTMLElement,
-        private config: Config
-    ) {}
+        
+        element : HTMLElement,
+        config : GraphConfig|IGraphConfigV3
+    ) {
+       this.config = config;
+        this.element = element
+    }
 
-    get(dimensions: Dimensions) {
+    measure(dimensions: Dimensions) {
 
         this.dimensions = dimensions;
 
-        this.element = (typeof this.element === 'string') ? document.querySelector(this.element) : this.element;
-
+        // svgWidth enn svgHeight includes the padding for axes 
+     
         this.dimensions.svgWidth = this.element.getBoundingClientRect().width - this.config.margin.left - this.config.margin.right;
         this.dimensions.width = dimensions.svgWidth - this.config.padding.left - this.config.padding.right;
 

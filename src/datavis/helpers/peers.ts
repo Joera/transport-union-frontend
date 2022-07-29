@@ -11,12 +11,19 @@ export function matchPeerSlug(peerId: string) {
 
     let shortName: string;
 
+    
     if ( k > -1) {
         shortName = "K" + k
     } else if (t > -1) {
         shortName = "T" + t
     } else if (s > -1) {
         shortName = "S" + s
+    } else if (peerId === '12D3KooWExAfK61mSetGMrym1439zrXUS9eSTz5szGzVnKyxgkaL') {
+        shortName = 'AMS1'
+    } else if(peerId === '12D3KooWAQRWaqSAEwU1RsNVLXnX3J899wkyifZQxBjCLW8dLTPe') {
+        shortName = 'AMS2'
+    } else if(peerId === '12D3KooWHE3EgDJa3WbPprnPqKAUUdj95FbAqeM7WKd9WEudMuAg') {
+        shortName = 'AMS3'
     } else {
         shortName = peerId
     }

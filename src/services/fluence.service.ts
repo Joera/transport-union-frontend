@@ -1,202 +1,214 @@
-import { FluencePeer } from "@fluencelabs/fluence";
+import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
+import { krasnodar } from "@fluencelabs/fluence-network-environment";
+import { IMainController } from "../controllers/main.controller";
 import { matchPeerName } from "../datavis/helpers/peers";
-import { GraphNode, GraphLink, NetworkData, PeerInfo, Service} from "../interfaces"
-import { getNeighborhood, isConnected, listServices, getPeerInfo } from '../_aqua/export'
-import LocalPeer from './local-peer.service';
+import { GraphNode, GraphLink, NetworkData, PeerInfo, Service, Peer} from "../interfaces"
+import { getNeighborhood, isConnected, listServices, getPeerInfo, getContact } from '../_aqua/export';
+import {isIP, isIPv4} from 'is-ip';
+import is_ip_private from 'private-ip';
+import { dnsEncode } from "ethers/lib/utils";
 
-export default class FluenceService {
 
-    connection: FluencePeer;
-    peerId: string;
+interface PeerObject {
+    multiaddr: string,
+    peerId: string
+}
+
+export interface IFluenceService {
+
+    _localPeer: KeyPair;
+    localPeer: KeyPair;
+    _relayPeer: PeerObject;
+    localPeerId: string;
     relayPeerId: string;
-    localPeerService;
-    messageboard: HTMLElement;
+    status: any;
+    setRelayPeerbyIndex: (index: number) => void;
+    connection: FluencePeer;
+    makeKeyPair: (sk: string) => Promise<KeyPair>;
+    connectToRelay: () => Promise<boolean>;
+    explore: (peerId: string) => Promise<boolean>;
+    connectedPeers:  string[];
+    unconnectedPeers:  string[];
+}
+
+export default class FluenceService implements IFluenceService {
+
+    _localPeer: KeyPair;
+    _relayPeer: PeerObject;
+    connection: FluencePeer;
+    connectedPeers:  string[];
+    unconnectedPeers:  string[];
 
     constructor(
-        private _dataStore: any
+        private main: IMainController
     ) {
-        this.localPeerService = new LocalPeer();
-        this.messageboard = document.getElementById("messageboard");
+        
+        this.connectedPeers = [];
+        this.unconnectedPeers = [];
     }
 
-    async init(key: string, relay: number) {
-        
-        this.connection = await this.localPeerService.init(key, relay);
-        
-        this.peerId = this.connection.getStatus().peerId;
-        this.relayPeerId = this.connection.getStatus().relayPeerId;
+    async makeKeyPair(sk: string) : Promise<KeyPair> {
+        const uint8array = new TextEncoder().encode(sk).slice(0,32);
+        return await KeyPair.fromEd25519SK(uint8array);
     }
 
-    async pushNodes(peers: string[], source: string) {
+    set localPeer(keyPair: any) {
+        this._localPeer = keyPair
+    } 
 
-        let nodes: GraphNode[] = [];
+    get localPeerId() : any {
+        return this._localPeer.toB58String();
+    }
+    
+    setRelayPeerbyIndex(index: number) {
+        this._relayPeer = this._selectRelay(index);
+    }
 
-        let index = this._dataStore.number_of_nodes;
+    get relayPeerId() : string {
+        return this._relayPeer ? this._relayPeer.peerId : "";
+    }
 
-        for (let peer of peers) {
+    async connectToRelay() {
 
-            if (!this._exists(peer)) {
+        this.connection = new FluencePeer();
+        await this.connection.start({
+            KeyPair: this._localPeer,
+            connectTo: this._relayPeer
+        }); 
 
-                let connected = await isConnected(this.connection, peer);
+        await this._addPeer({ peerId : this.relayPeerId, addresses : [] },this.localPeerId)
 
-                let role = this.matchRole(peer);
-                let name = matchPeerName(peer)
+        return true; 
+    }
 
-                nodes.push({
-                    id: index,
-                    peerId: peer,
-                    name,
-                    connected,
-                    incoming: 0,
-                    outgoing: 0,
-                    role,
-                    services: [],
-                    myServices: []
-                });
-                index++;
+    get status() {
+        return this.connection ? this.connection.getStatus() : {}
+    }
+
+    _selectRelay(index: number)  {
+
+        if(index == 5) {
+
+            return {
+                multiaddr: '/ip4/143.176.14.172/tcp/7770/p2p/12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
+                peerId: '12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
             }
-        }
 
-        this._dataStore.nodes = nodes;
+        } else {
+            return krasnodar[index];
+        }    
     }
 
-    addLocalPeer(localPeer: string, relay: string) {
+    async explore(sourcePeerId: string) : Promise<boolean> {
 
-        if (!this._exists(localPeer)) {
-
-            this._dataStore.nodes = [{
-                id: this._dataStore.number_of_nodes,
-                peerId: localPeer,
-                name: localPeer,
-                connected : true,
-                incoming: 0,
-                outgoing: 1,
-                role: "js-peer",
-                services: [],
-                myServices: []
-            }]
-
-        }
-
-        this._dataStore.links = [{
-            source: this._dataStore.nodes.map((p: GraphNode) => p.peerId).indexOf(localPeer),
-            target: this._dataStore.nodes.map((p: GraphNode) => p.peerId).indexOf(relay)
-        }]
-
-    }
-
-
-    pushLinks(peers: string[], source: string) {
-
-        let links: GraphLink[] = [];
-
-        for (let peer of peers) {
-
-          //  let targetNode = this._dataStore.nodes.find( (n: GraphNode) => n.peerId === peer);
-            
-            // if (targetNode.connected) {
-            
-                try {
-                    links.push({
-                        // dit kun je evt met ids doen .... 
-                        source: this._dataStore.nodes.map((p: GraphNode) => p.peerId).indexOf(source),
-                        target: this._dataStore.nodes.map((p: GraphNode) => p.peerId).indexOf(peer)
-                    });
-
-                } catch {
-                    console.log("error pushing link for " + source + " and " + peer);  
-                }
-            // }
-        }
-        links = links.filter( (l) => {
-            return l.source !== l.target;
-        })
-
-        this._dataStore.links = links;
-
-    }
-
-    async explore(relay: string)  {
-
-        let peers;
-
-        this.messageboard.innerText = "exploring neighborhood of " + relay;
+        let peers: any[];
+        let newConnectPeers = [];
 
         try {
-
-            peers = await getNeighborhood(this.connection, relay);
-
-            if(relay === this.relayPeerId) {
-                let hasLocalPeer = peers.find( (p) => p === this.peerId);
-                // console.log(hasLocalPeer)
-                peers = peers.concat(this.peerId)
-            }
-
-        } catch {
-            console.log(relay + " could not be reached");
+            peers = await getNeighborhood(this.connection, sourcePeerId);
+        } catch {   
+            console.log(this.relayPeerId + " could not be reached");
+            return false;
         }
 
-        if(peers) {
+        for (const peer of peers) {
+
+            if(this.connectedPeers.indexOf(peer) < 0 && this.connectedPeers.indexOf(peer) < 0) {
+            
+                const c = await isConnected(this.connection,sourcePeerId, peer);
+
+                if(c) {
+                    this.connectedPeers.push(peer);
+                    newConnectPeers.push(peer);
+                } else {
+                    this.unconnectedPeers.push(peer);
+                }
+
+            } else {
+
+            }
+        }
+
+        for (let newPeerId of newConnectPeers) {
 
             try {
-                await this.pushNodes(peers,relay);
-                this.pushLinks(peers,relay);
-                this._dataStore.recalculate();
+
+                let contact = await getContact(this.connection, sourcePeerId, newPeerId);
+
+                let peer: Peer = {
+                    peerId : newPeerId,
+                    addresses: contact && contact.addresses ? contact.addresses : []
+                }
+
+                this._addPeer(peer,sourcePeerId)
+           
             } catch(error) {
-                console.log("error pushing data for " + relay);
+                console.log("error pushing data for " + sourcePeerId);
                 console.log(error);
             }
 
         }
+
+
+        return true;
     }
 
-    matchRole(peer: string) {
-
-        switch(peer) {
-
-            case this.peerId:
-                return "localPeer"
-            case this.relayPeerId:
-                return "relayPeer"
-            default:
-                return "peer"
+    _addPeer(peer: Peer, sourcePeerId: string) {
 
 
-        }
+        this.main.peers.addPeer(peer);
+        this.augment(peer);
+        this.main.graphData.addNode(peer.peerId,sourcePeerId)
     }
 
-    async getPeerInfo(peer: string) {
+    // augment peers
+    async augment(peer: Peer) {
 
-        let info: PeerInfo;
-
-        if(peer !== this.peerId) {
-            try {
-                info = await getPeerInfo(this.connection, peer);
-            } catch {
-                console.log("failed to get info for " + peer);
-            }
+        if(peer.addresses.length === 0) {
+            return;
         }
 
-        this._dataStore.addInfoToPeer(peer,info);
-    }
+        let ip;
 
-    async getPeerServices(peer: string) {
+        let ipOrDn = peer.addresses[0].split("/")[2];
 
-        let services: Service[];
-
-        try {
-            services = await listServices(this.connection, peer);
-        } catch {
-            console.log("failed to get services for " + peer);
+        if(is_ip_private(ipOrDn)) {
+            return;
         }
 
-        this._dataStore.addServicesToPeer(peer,services, this.peerId);
+        if (isIPv4(ipOrDn)) {
+
+            ip = ipOrDn;
+
+        } else {
+
+            var response = await fetch('https://dns.google/resolve?name=' + ipOrDn);
+            var json = await response.json();
+            ip = json.Answer[0].data;
+        }
+
+    
+
+        let url = 'https://api.ipgeolocation.io/ipgeo?apiKey=058fa865d0d84183b5dab95a7d07463c&ip=' + ip
+
+        fetch(url)
+            .then(response=>response.json())
+            .then(data => {  
+                peer.location = data;
+                this.main.peers.addPeer(peer);
+            });
     }
 
-    _exists(peer: string) {
+    // find new peers
+    async expand() {
 
-        return this._dataStore.nodes.map( (p: GraphNode) => p.peerId).indexOf(peer) < 0 ? false : true;
+        for (let peer of this.main.peers.peers) {
+            await this.explore(peer.peerId);
+        }
+
     }
 
+    
+;
     
 } 

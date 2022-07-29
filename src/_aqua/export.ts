@@ -20,12 +20,14 @@ import {
  
 
 export function isConnected(
+    relay: string,
     peer_: string,
     config?: {ttl?: number}
 ): Promise<boolean>;
 
 export function isConnected(
     peer: FluencePeer,
+    relay: string,
     peer_: string,
     config?: {ttl?: number}
 ): Promise<boolean>;
@@ -37,49 +39,28 @@ export function isConnected(...args: any) {
                      (seq
                       (seq
                        (seq
-                        (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                        (call %init_peer_id% ("getDataSrv" "peer") [] peer)
-                       )
-                       (new $connected
                         (seq
-                         (new $connection
-                          (seq
-                           (seq
-                            (par
-                             (seq
-                              (call -relay- ("op" "noop") [])
-                              (xor
-                               (seq
-                                (seq
-                                 (call peer ("op" "noop") [])
-                                 (ap peer $connection)
-                                )
-                                (call -relay- ("op" "noop") [])
-                               )
-                               (seq
-                                (call -relay- ("op" "noop") [])
-                                (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                               )
-                              )
-                             )
-                             (call %init_peer_id% ("peer" "timeout") [300 "timeout"] $connection)
-                            )
-                            (call %init_peer_id% ("op" "noop") [$connection.$.[0]!])
-                           )
-                           (xor
-                            (mismatch $connection.$.[0]! "timeout"
-                             (ap true $connected)
-                            )
-                            (ap false $connected)
-                           )
-                          )
+                         (seq
+                          (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                          (call %init_peer_id% ("getDataSrv" "relay") [] relay)
                          )
-                         (call %init_peer_id% ("op" "identity") [$connected.$.[0]!] connected-fix)
+                         (call %init_peer_id% ("getDataSrv" "peer") [] peer)
+                        )
+                        (call -relay- ("op" "noop") [])
+                       )
+                       (xor
+                        (seq
+                         (call relay ("peer" "is_connected") [peer] c)
+                         (call -relay- ("op" "noop") [])
+                        )
+                        (seq
+                         (call -relay- ("op" "noop") [])
+                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
                         )
                        )
                       )
                       (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [connected-fix])
+                       (call %init_peer_id% ("callbackSrv" "response") [c])
                        (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
                       )
                      )
@@ -95,6 +76,10 @@ export function isConnected(...args: any) {
         "domain" : {
             "tag" : "labeledProduct",
             "fields" : {
+                "relay" : {
+                    "tag" : "scalar",
+                    "name" : "string"
+                },
                 "peer" : {
                     "tag" : "scalar",
                     "name" : "string"
@@ -107,6 +92,107 @@ export function isConnected(...args: any) {
                 {
                     "tag" : "scalar",
                     "name" : "bool"
+                }
+            ]
+        }
+    },
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+ 
+export type GetPeerInfoResult = { air_version: string; external_addresses: string[]; node_version: string; }
+export function getPeerInfo(
+    peer_: string,
+    config?: {ttl?: number}
+): Promise<GetPeerInfoResult>;
+
+export function getPeerInfo(
+    peer: FluencePeer,
+    peer_: string,
+    config?: {ttl?: number}
+): Promise<GetPeerInfoResult>;
+
+export function getPeerInfo(...args: any) {
+
+    let script = `
+                    (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                         (call %init_peer_id% ("getDataSrv" "peer") [] peer)
+                        )
+                        (call -relay- ("op" "noop") [])
+                       )
+                       (xor
+                        (seq
+                         (call peer ("peer" "identify") [] info)
+                         (call -relay- ("op" "noop") [])
+                        )
+                        (seq
+                         (call -relay- ("op" "noop") [])
+                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                        )
+                       )
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [info])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getPeerInfo",
+    "arrow" : {
+        "tag" : "arrow",
+        "domain" : {
+            "tag" : "labeledProduct",
+            "fields" : {
+                "peer" : {
+                    "tag" : "scalar",
+                    "name" : "string"
+                }
+            }
+        },
+        "codomain" : {
+            "tag" : "unlabeledProduct",
+            "items" : [
+                {
+                    "tag" : "struct",
+                    "name" : "Info",
+                    "fields" : {
+                        "air_version" : {
+                            "tag" : "scalar",
+                            "name" : "string"
+                        },
+                        "external_addresses" : {
+                            "tag" : "array",
+                            "type" : {
+                                "tag" : "scalar",
+                                "name" : "string"
+                            }
+                        },
+                        "node_version" : {
+                            "tag" : "scalar",
+                            "name" : "string"
+                        }
+                    }
                 }
             ]
         }
@@ -323,19 +409,21 @@ export function listServices(...args: any) {
 }
 
  
-export type GetPeerInfoResult = { air_version: string; external_addresses: string[]; node_version: string; }
-export function getPeerInfo(
+export type GetContactResult = { addresses: string[]; peer_id: string; }
+export function getContact(
+    relay: string,
     peer_: string,
     config?: {ttl?: number}
-): Promise<GetPeerInfoResult>;
+): Promise<GetContactResult>;
 
-export function getPeerInfo(
+export function getContact(
     peer: FluencePeer,
+    relay: string,
     peer_: string,
     config?: {ttl?: number}
-): Promise<GetPeerInfoResult>;
+): Promise<GetContactResult>;
 
-export function getPeerInfo(...args: any) {
+export function getContact(...args: any) {
 
     let script = `
                     (xor
@@ -343,14 +431,17 @@ export function getPeerInfo(...args: any) {
                       (seq
                        (seq
                         (seq
-                         (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                         (seq
+                          (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                          (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+                         )
                          (call %init_peer_id% ("getDataSrv" "peer") [] peer)
                         )
                         (call -relay- ("op" "noop") [])
                        )
                        (xor
                         (seq
-                         (call peer ("peer" "identify") [] info)
+                         (call relay ("peer" "get_contact") [peer] c)
                          (call -relay- ("op" "noop") [])
                         )
                         (seq
@@ -360,7 +451,7 @@ export function getPeerInfo(...args: any) {
                        )
                       )
                       (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [info])
+                       (call %init_peer_id% ("callbackSrv" "response") [c])
                        (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
                       )
                      )
@@ -370,12 +461,16 @@ export function getPeerInfo(...args: any) {
     return callFunction(
         args,
         {
-    "functionName" : "getPeerInfo",
+    "functionName" : "getContact",
     "arrow" : {
         "tag" : "arrow",
         "domain" : {
             "tag" : "labeledProduct",
             "fields" : {
+                "relay" : {
+                    "tag" : "scalar",
+                    "name" : "string"
+                },
                 "peer" : {
                     "tag" : "scalar",
                     "name" : "string"
@@ -387,20 +482,16 @@ export function getPeerInfo(...args: any) {
             "items" : [
                 {
                     "tag" : "struct",
-                    "name" : "Info",
+                    "name" : "Contact",
                     "fields" : {
-                        "air_version" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "external_addresses" : {
+                        "addresses" : {
                             "tag" : "array",
                             "type" : {
                                 "tag" : "scalar",
                                 "name" : "string"
                             }
                         },
-                        "node_version" : {
+                        "peer_id" : {
                             "tag" : "scalar",
                             "name" : "string"
                         }

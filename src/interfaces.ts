@@ -1,41 +1,46 @@
 import { InformationEvent } from "http"
 import { GetPeerInfoResult } from "./_aqua/export"
 
-export interface GraphNode  {
-    id: number,
+export interface Peer {
     peerId: string,
+    addresses?: string[],
     name?: string,
-    fx?: number,
-    fy?: number,
-    cx?: number,
-    cy?: number,
-    role?: string,
-    selected?: boolean,
-    connected?: boolean,
-    incoming?: number,
-    outgoing?: number,
+    location?: any,
     info?: PeerInfo,
     services?: Service[]
     myServices?: Service[]
 }
 
-export interface Satelite  {
+export interface GraphNode   {
     id: number,
     peerId: string,
-    name?: string,
     fx?: number,
     fy?: number,
     cx?: number,
     cy?: number,
-    role?: string,
-    selected?: boolean,
-    connected?: boolean,
-    incoming?: number,
-    outgoing?: number,
-    info?: PeerInfo,
-    services?: Service[]
-    myServices?: Service[]
+    selected?: boolean
 }
+
+export type Satelite = GraphNode
+
+// export interface Satelite  {
+//     id: number,
+//     peerId: string,
+//     addresses?: string[],
+//     name?: string,
+//     fx?: number,
+//     fy?: number,
+//     cx?: number,
+//     cy?: number,
+//     role?: string,
+//     selected?: boolean,
+//     connected?: boolean,
+//     incoming?: number,
+//     outgoing?: number,
+//     info?: PeerInfo,
+//     services?: Service[]
+//     myServices?: Service[]
+// }
 
 export interface GraphLink {
     source: number,

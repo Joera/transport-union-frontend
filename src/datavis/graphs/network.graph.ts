@@ -6,13 +6,14 @@ import * as d3 from "d3";
 
 
 import { ChartObjects, ChartSVG, ChartDimensions, ChartScale, ChartAxes } from '../chart-basics/module';
-import { Network} from "../chart-elements/module";
+import { Network} from "../svg-elements/module";
 import { BaseType, SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import { Dimensions } from "../types/dimensions";
 import { FluencePeer } from "@fluencelabs/fluence";
-import { Simulation } from "../chart-elements/simulation";
+import { Simulation } from "../svg-elements/simulation";
+import { GraphControllerV3 } from "./graph-v3";
 
-export default class NetworkGraph {
+export default class NetworkGraph extends GraphControllerV3 { 
 
     // localPeer: FluencePeer;
     element: HTMLElement;
@@ -25,34 +26,15 @@ export default class NetworkGraph {
 
     graphNetworkElements: any;
 
-    config = {
-        "graphType": "Network",
-        "xScaleType" : false,
-        "yScaleType" : false,
-        "xParameter" : false,
-        "yParameter" : false,
-        "padding": {
-            "top": 0,
-            "bottom": 0,
-            "left": 0,
-            "right": 0
-        },
-        "margin": {
-            "top": 0,
-            "bottom": 0,
-            "left": 0,
-            "right": 0
-        },
-        "extra" :{}
-    }
+
 
     simulation: any = {};
 
     constructor(
-        private mainController: any,
-        private elementID: string,
+        public main: any,
+        public elementId: string,
     ){
-        this.element = d3.select('#' + elementID).node() as HTMLElement;
+        super(main,elementId)
     }
 
     init() {
@@ -80,7 +62,7 @@ export default class NetworkGraph {
         // into constructor
     
         // inject this 
-        this.graphNetworkElements = new Network(this.mainController, this)
+        this.graphNetworkElements = new Network(this.main, this)
         this.simulation.init(this.graphNetworkElements,this.dimensions);
 
 
@@ -120,10 +102,10 @@ export default class NetworkGraph {
 
         for (let node of data.nodes) {
 
-            if (node.role === 'localPeer') {
+            if (node.peerId === this.main.fluence.localPeerId) {
                 node.fx = this.dimensions.width / 2;
                 node.fy = 0;
-            } else if (node.role === "relayPeer") {
+            } else if (node.peerId === this.main.fluence.relayPeerId) {
                 node.fx = this.dimensions.width / 2;
                 node.fy = 60;
             }
@@ -132,8 +114,6 @@ export default class NetworkGraph {
             //     node.fy = this.dimensions.height / 2
             // }
         }
-
-        // console.log(data);
 
         return data;
     } 

@@ -1,33 +1,33 @@
 @mixin regular {
-    font-family: "NotoSans Regular";
-    font-size: 1rem;
+    font-family: "Operator Book";
+    font-size: .75rem;
     line-height: 1.55;
 }
 
 @mixin digital {
-    font-family: "NotoSans Light";
+    font-family: "Operator Light";
     font-size: .75rem;
     line-height: 1.33; 
 }
 
 @mixin display {
-    font-family: "NotoSans SemiBold";
+    font-family: "Operator Bold";
     font-size: 1.45rem;
     line-height: 1.125; 
 }
 
-@mixin number {
-    font-family: "NotoSans SemiBold";
-    font-size: 3.2rem;
-    line-height: 1;
-    letter-spacing: -1px; 
-}
+// @mixin number {
+//     font-family: "NotoSans SemiBold";
+//     font-size: 3.2rem;
+//     line-height: 1;
+//     letter-spacing: -1px; 
+// }
 
 @mixin uppercase {
-    font-family: "NotoSans Light";
+    font-family: "Gotham Light";
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-size: .825rem; 
+    letter-spacing: 1px;
+    font-size: .75rem; 
 }
 
 body {
@@ -43,3 +43,9 @@ label {
     color: black;
     text-decoration: none;
     border-bottom: 1px solid black; }
+
+
+h3 {
+    font-family: Gotham Bold;
+    margin: 0;
+}

@@ -1,27 +1,25 @@
 form {
 
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-items: center;
-
+	
 	p  { line-height: 1.44; margin: 1.5rem 0; font-size: 1rem; }
 
 	input, textarea, select {
 
-		font-family: 'Cabrito Sans W01 Ext Book', arial;
+		font-family: "Operator book";
 		color: $zwart;
 		font-size: 1.06rem;
 		line-height: 1.45;
 	}
 
 	input {
-		padding: .5rem 0;
+		padding: .25rem 0;
 		border: none;
-		border-bottom: 1px solid $grijs;
+		border-bottom: 1px dotted black;
 		-webkit-appearance: none;
 		-moz-appearance: none;
 		appearance: none;
+		margin-bottom: 1.5rem;
+		width: calc(100% - 4rem);
 
 		&:focus {
 			border-color: $donkerrood; outline: none;

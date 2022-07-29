@@ -1,0 +1,13 @@
+form {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    width: calc(100% - 4rem);
+    padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	align-items: center;
+    border: 1px solid #ddd;
+
+}

@@ -14,18 +14,10 @@ html {
 
 body {
 	background: white;
-	padding-top: 60px;
+	// padding-top: 60px;
 	width: 100vw;
 	overflow-x: hidden;
  }
 
 .noscript { display: none; }
 
-main {
-	width: 100vw;
-	//overflow-x: hidden;
-	position: relative;
-	display: flex;
-	flex-flow: column wrap;
-	align-items: center;
-}

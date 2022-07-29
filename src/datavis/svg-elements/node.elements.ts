@@ -19,7 +19,7 @@ export default class NodeElements  {
     // chord: any;
 
     constructor(
-        private mainController: any,
+        private main: any,
         private ctrlr: any
     ){
 
@@ -30,42 +30,46 @@ export default class NodeElements  {
             .attr("font-size", 10);
      } 
 
-    draw(data: NetworkData, chords: any) {
+    draw(nodes: GraphNode[], chords: any) {
 
         let self = this; 
 
-        const matchPeerSlugByIndex = this.mainController.dataStore.matchPeerSlugByIndex.bind(this.mainController.dataStore);
+        const matchPeerSlugByIndex = this.main.graphData.matchPeerSlugByIndex.bind(this.main.graphData);
 
-        const peers = chords.groups.filter( (g: any) =>  { 
-            let n = this.mainController.dataStore.findNodeByIndex(g.index);
-            if( n != undefined && (n.role  === "peer" || n.role === "relayPeer")) return g;
-        });
+        // const peers = chords.groups.filter( (g: any) =>  { 
+        //     let n = this.main.peers.findNodeByIndex(g.index);
+        //     if( n != undefined && (n.role  === "peer" || n.role === "relayPeer")) return g;
+        // });
+
+        // console.log(nodes);
 
         this.ctrlr.svg.layers.data.select("g.nodes")
             .selectAll("path.node")
-            .data(peers, (d: any) => {
-                return matchPeerSlugByIndex(d.index);
+            .data(nodes, (d: any) => {
+
+                console.log(d);
+                return matchPeerSlugByIndex(d.id);
             })
             .join(
                 (enter : any) => {
 
                     enter
                         .append("path")
-                        .attr("class", (d:any) =>  "node " + matchPeerSlugByIndex(d.index))
+                        .attr("class", (d:any) =>  "node " + matchPeerSlugByIndex(d.id))
                         .attr("stroke", "#fff")
                         .attr("fill", (d: any) => {
 
                             try { 
 
-                                let node = data.nodes.find((n:any) => n.id === d.index);
+                                let node = nodes.find((n:any) => n.id === d.index);
 
-                                if (node && node.role === "relayPeer") {
-                                    return colours.orange[0]; 
-                                } else if (node && !node.connected) {
-                                    return colours.lightGrey[0];
-                                } else {
+                                // if (node && node.role === "relayPeer") {
+                                //     return colours.orange[0]; 
+                                // } else if (node && !node.connected) {
+                                //     return colours.lightGrey[0];
+                                // } else {
                                     return colours.darkGrey[0]; 
-                                }
+                                // }
                             } catch {
                                 return "#000"
                             }
@@ -107,8 +111,8 @@ export default class NodeElements  {
 
                                     // console.log(dd);
 
-                                    let source = self.mainController.dataStore.nodes.find( (n:any) => n.id === dd.source.index);
-                                    let target = self.mainController.dataStore.nodes.find( (n:any) => n.id === dd.target.index);
+                                    let source = self.main.graphData.nodes.find( (n:any) => n.id === dd.source.index);
+                                    let target = self.main.graphData.nodes.nodes.find( (n:any) => n.id === dd.target.index);
                                     
                                     if (source && target) {
                                     
@@ -135,7 +139,7 @@ export default class NodeElements  {
             ;
 
             this.ctrlr.svg.layers.data.select("g.nodes").selectAll("text")
-                .data(peers, (d: any) => {
+                .data(nodes, (d: any) => {
                     return matchPeerSlugByIndex(d.index);
                 })
                 .join(
@@ -163,7 +167,7 @@ export default class NodeElements  {
                     (update: any) => {
 
                         update.select("textPath")
-                            .attr("startOffset", (d: any, i: number, el: any) => self.ctrlr.coreCircle.labels(data, d));
+                            .attr("startOffset", (d: any, i: number, el: any) => self.ctrlr.coreCircle.labels(nodes, d));
                     }
 
                 );

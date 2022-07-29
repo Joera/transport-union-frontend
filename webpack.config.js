@@ -8,7 +8,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const isProduction = process.env.NODE_ENV == "production";
 
 const config = {
-  entry: ["./src/main.controller.ts","./styling/main.scss"],
+  entry: ["./src/controllers/main.controller.ts","./styling/main.scss"],
   output: {
     path: path.resolve(__dirname, "public/"),
     chunkFilename: 'scripts.js',
@@ -22,26 +22,26 @@ const config = {
     //   return `./styling/${filepath}/[name].[hash][ext][query]`;
     // },
   },
-  // devServer: {
-  //   open:true,
-  //   port: 3000,
-  //   hot: true,
-  //   client: {
-  //     overlay: true,
-  //     progress: true,
-  //     reconnect: true,
-  //   },
-  // },
+  devServer: {
+    open:false,
+    port: 3000,
+    hot: false,
+    client: {
+      overlay: true,
+      progress: true,
+      reconnect: true,
+    },
+  },
   devtool:'source-map',
   plugins: [
       new MiniCssExtractPlugin({
         filename: "styles.css"
       }),
-      // new CopyWebpackPlugin({
-      //   patterns: [
-      //       { from: 'static' }
-      //   ]
-      // }),
+      new CopyWebpackPlugin({
+        patterns: [
+            { from: 'static' }
+        ]
+      }),
       new CopyWebpackPlugin({
         patterns: [
           'node_modules/@fluencelabs/avm/dist/avm.wasm',
@@ -76,8 +76,8 @@ const config = {
   resolve: {
     extensions: [".ts",".js"],
     fallback: { 
-      "buffer": require.resolve("buffer/") ,
-      "crypto": require.resolve("crypto-browserify")
+      "buffer": require.resolve("buffer/"),
+      "crypto": require.resolve("crypto-browserify"),
     }
   },
 };

@@ -42,7 +42,7 @@ export class CircularThings {
 
     redraw() {
 
-        this.innerRadius = Math.min(this.ctrlr.dimensions.width, this.ctrlr.dimensions.height) * 0.4 - this.radiusOffset;
+        this.innerRadius = Math.min(this.ctrlr.dimensions.width, this.ctrlr.dimensions.height) * .4 - this.radiusOffset;
         this.outerRadius = this.innerRadius + 16
 
         let innerRadius = this.innerRadius;
@@ -79,6 +79,8 @@ export class CircularThings {
 
             return angle;
         }
+
+        // console.log(this);
    
         this.arc = d3.arc()
             .innerRadius((d: any) => this.innerRadius)
@@ -193,17 +195,17 @@ export class CircularThings {
         let items: any[] = [];
         let minItems: number;
 
-        switch (this.slug) {
+        // switch (this.slug) {
 
-            case "core": 
-                items = this.ctrlr.mainController.dataStore.peers;
+        //     case "core": 
+                items = this.ctrlr.main.graphData.nodes;
                 minItems = items.length
-                break;
-            case "satelite":
-                items = this.ctrlr.mainController.dataStore.satelites;
-                minItems = 40
-                break;
-        }
+            //     break;
+            // case "satelite":
+            //     items = this.ctrlr.mainController.dataStore.satelites;
+            //     minItems = 40
+            //     break;
+        //}
 
         return { items, minItems}
     }
