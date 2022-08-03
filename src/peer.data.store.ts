@@ -13,6 +13,8 @@ export interface IPeerStore {
     peers: Peer[];
     findPeer: (peerId: string) => Peer;
     addPeer: (peer: Peer) => void;
+    expandNeighborhood: (source: string, neighbors: string[]) => void;
+    addConnection: (source: string, target: string) => void
     // exists: (peerId: string) => boolean;
 
 }
@@ -56,6 +58,24 @@ export default class PeerStore implements IPeerStore {
     get peers() {
 
         return Object.values(this._peers);
+    }
+
+    expandNeighborhood(source: string, neighbors: string[]) {
+
+        for (const n of neighbors) {
+            if (this._peers[source].kademlia_neighbors.indexOf(n) < 0) {
+                this._peers[source].kademlia_neighbors.push(n);
+            }
+        }
+
+        this.main.update(true);
+    }
+
+    addConnection(source: string, target: string) {
+      
+        this._peers[source].tested_connections.push(target);
+       // this.main.graphData.addConnection(source, target);
+        this.main.update(true);
     }
 
     // exists(peerId: string) :boolean {

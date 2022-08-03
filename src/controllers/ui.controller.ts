@@ -92,6 +92,11 @@ export class UiController implements IUiController {
                 this.sections['map-view'].style.zIndex = 100;
             break;
 
+            case 'select-matrix-view':
+                this.hideSections();
+                this.sections['matrix-view'].style.zIndex = 100;
+            break;
+
             case  'select-chords-view':
                 this.hideSections();
                 this.sections['chords-view'].style.zIndex = 100;
@@ -129,7 +134,7 @@ export class UiController implements IUiController {
                 this.updateIdentityPane();
                 await this.main.fluence.connectToRelay();
                 this.updateIdentityPane();
-                this.main.dataLoop();
+                this.main.exploration.dataLoop();
           
             break;
 

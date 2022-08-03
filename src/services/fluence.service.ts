@@ -1,12 +1,9 @@
 import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { IMainController } from "../controllers/main.controller";
-import { matchPeerName } from "../datavis/helpers/peers";
-import { GraphNode, GraphLink, NetworkData, PeerInfo, Service, Peer} from "../interfaces"
+
 import { getNeighborhood, isConnected, listServices, getPeerInfo, getContact } from '../_aqua/export';
-import {isIP, isIPv4} from 'is-ip';
-import is_ip_private from 'private-ip';
-import { dnsEncode } from "ethers/lib/utils";
+
 
 
 interface PeerObject {
@@ -26,9 +23,10 @@ export interface IFluenceService {
     connection: FluencePeer;
     makeKeyPair: (sk: string) => Promise<KeyPair>;
     connectToRelay: () => Promise<boolean>;
-    explore: (peerId: string) => Promise<boolean>;
-    connectedPeers:  string[];
-    unconnectedPeers:  string[];
+    //explore: (peerId: string) => Promise<boolean>;
+    neighborhood: (sourcePeerId: string) => Promise<string[]>
+    contact: (source: string, target: string) => Promise<any>
+    isConnected: (source: string, target: string) => Promise<any>
 }
 
 export default class FluenceService implements IFluenceService {
@@ -36,15 +34,12 @@ export default class FluenceService implements IFluenceService {
     _localPeer: KeyPair;
     _relayPeer: PeerObject;
     connection: FluencePeer;
-    connectedPeers:  string[];
-    unconnectedPeers:  string[];
 
     constructor(
         private main: IMainController
     ) {
         
-        this.connectedPeers = [];
-        this.unconnectedPeers = [];
+        
     }
 
     async makeKeyPair(sk: string) : Promise<KeyPair> {
@@ -76,7 +71,7 @@ export default class FluenceService implements IFluenceService {
             connectTo: this._relayPeer
         }); 
 
-        await this._addPeer({ peerId : this.relayPeerId, addresses : [] },this.localPeerId)
+        this.main.exploration.addPeer({ peerId : this.relayPeerId, public: true, addresses : [], kademlia_neighbors: [], tested_connections: [] },this.localPeerId)
 
         return true; 
     }
@@ -99,114 +94,25 @@ export default class FluenceService implements IFluenceService {
         }    
     }
 
-    async explore(sourcePeerId: string) : Promise<boolean> {
+    async neighborhood(sourcePeerId: string) {
 
-        let peers: any[];
-        let newConnectPeers = [];
-
-        try {
-            peers = await getNeighborhood(this.connection, sourcePeerId);
-        } catch {   
-            console.log(this.relayPeerId + " could not be reached");
-            return false;
-        }
-
-        for (const peer of peers) {
-
-            if(this.connectedPeers.indexOf(peer) < 0 && this.connectedPeers.indexOf(peer) < 0) {
-            
-                const c = await isConnected(this.connection,sourcePeerId, peer);
-
-                if(c) {
-                    this.connectedPeers.push(peer);
-                    newConnectPeers.push(peer);
-                } else {
-                    this.unconnectedPeers.push(peer);
-                }
-
-            } else {
-
-            }
-        }
-
-        for (let newPeerId of newConnectPeers) {
-
-            try {
-
-                let contact = await getContact(this.connection, sourcePeerId, newPeerId);
-
-                let peer: Peer = {
-                    peerId : newPeerId,
-                    addresses: contact && contact.addresses ? contact.addresses : []
-                }
-
-                this._addPeer(peer,sourcePeerId)
-           
-            } catch(error) {
-                console.log("error pushing data for " + sourcePeerId);
-                console.log(error);
-            }
-
-        }
-
-
-        return true;
+        return await getNeighborhood(this.connection, sourcePeerId);
     }
 
-    _addPeer(peer: Peer, sourcePeerId: string) {
+    async contact(source: string, target: string) {
 
-
-        this.main.peers.addPeer(peer);
-        this.augment(peer);
-        this.main.graphData.addNode(peer.peerId,sourcePeerId)
+        return await getContact(this.connection, source, target)
     }
 
-    // augment peers
-    async augment(peer: Peer) {
+    async isConnected(source: string, target: string) {
 
-        if(peer.addresses.length === 0) {
-            return;
-        }
+        return await isConnected(this.connection,source, target)
 
-        let ip;
-
-        let ipOrDn = peer.addresses[0].split("/")[2];
-
-        if(is_ip_private(ipOrDn)) {
-            return;
-        }
-
-        if (isIPv4(ipOrDn)) {
-
-            ip = ipOrDn;
-
-        } else {
-
-            var response = await fetch('https://dns.google/resolve?name=' + ipOrDn);
-            var json = await response.json();
-            ip = json.Answer[0].data;
-        }
+    }
 
     
 
-        let url = 'https://api.ipgeolocation.io/ipgeo?apiKey=058fa865d0d84183b5dab95a7d07463c&ip=' + ip
-
-        fetch(url)
-            .then(response=>response.json())
-            .then(data => {  
-                peer.location = data;
-                this.main.peers.addPeer(peer);
-            });
-    }
-
-    // find new peers
-    async expand() {
-
-        for (let peer of this.main.peers.peers) {
-            await this.explore(peer.peerId);
-        }
-
-    }
+    
 
     
 ;

@@ -7,6 +7,18 @@ table {
 
         td {
             padding: 0.1rem .5rem;
+
+            &:first-of-type {
+
+                > span {
+
+                    display: block;
+                    width: .5rem;
+                    height: .5rem;
+                    border-radius: 50%; 
+                    border: 1px solid #dedede;
+                }
+            }
         }
     }
 }

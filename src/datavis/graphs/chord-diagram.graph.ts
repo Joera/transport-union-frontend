@@ -96,7 +96,7 @@ export default class ChordDiagramGraph extends GraphControllerV3 {
 
         this.nodeElements = new NodeElements(this.main, this);
         // this.sateliteElements = new SateliteElements(this.main, this);
-        // this.chordElements = new ChordElements(this.main, this);
+        this.chordElements = new ChordElements(this.main, this);
         // this.connectionElements = new ConnectionElements(this.main, this);
 
         
@@ -121,7 +121,7 @@ export default class ChordDiagramGraph extends GraphControllerV3 {
         const index = new Map(nodes.map((n: any, i: number) => [n.peerId, i]));
         let matrix = Array.from(index, () => new Array(nodes.length).fill(0));
 
-        for (const {source, target} of this.main.graphData.links) {
+        for (const {source, target} of this.main.graphData.connections) {
             
             try {
                 matrix[source][target] = 1;
@@ -146,7 +146,7 @@ export default class ChordDiagramGraph extends GraphControllerV3 {
     draw(data: any) {
 
         this.nodeElements.draw(data.nodes, data.coreChords);
-    //     this.chordElements.draw(data.networkData, data.coreChords);
+        this.chordElements.draw(data.nodes, data.coreChords);
 
     //     this.sateliteElements.draw(data.networkData, data.sateliteChords);
 
@@ -163,7 +163,7 @@ export default class ChordDiagramGraph extends GraphControllerV3 {
           super.redraw(data);
           this.coreCircle.redraw();
           this.nodeElements.redraw();
-        //   this.chordElements.redraw();
+          this.chordElements.redraw();
         //   this.sateliteElements.redraw();
     }
   

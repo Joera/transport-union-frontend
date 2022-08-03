@@ -41,13 +41,9 @@ export default class NodeElements  {
         //     if( n != undefined && (n.role  === "peer" || n.role === "relayPeer")) return g;
         // });
 
-        // console.log(chords);
-
         this.ctrlr.svg.layers.data.select("g.nodes")
             .selectAll("path.node")
-            .data(chords, (d: any) => {
-
-                console.log(d);
+            .data(chords.groups, (d: any) => {
                 return matchPeerSlugByIndex(d.index);
             })
             .join(
@@ -60,8 +56,9 @@ export default class NodeElements  {
                         .attr("fill", (d: any) => {
 
                             try { 
+                                
 
-                                let node = nodes.find((n:any) => n.id === d.index);
+                                let node = nodes.find((n:any) => n.index === d.index);
 
                                 // if (node && node.role === "relayPeer") {
                                 //     return colours.orange[0]; 
@@ -139,7 +136,7 @@ export default class NodeElements  {
             ;
 
             this.ctrlr.svg.layers.data.select("g.nodes").selectAll("text")
-                .data(nodes, (d: any) => {
+                .data(chords.groups, (d: any) => {
                     return matchPeerSlugByIndex(d.index);
                 })
                 .join(

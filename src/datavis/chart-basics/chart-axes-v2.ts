@@ -7,6 +7,7 @@ import { DataPart, GraphData } from '../types/data';
 import { breakpoints } from '../helpers/_breakpoints';
 import { IGraphControllerV3 } from '../graphs/graph-v3';
 import { Axis, AxisDomain } from 'd3';
+import { shortName } from '../helpers/peers';
 
 export class ChartAxesV2 {
 
@@ -86,7 +87,7 @@ export class ChartAxesV2 {
 
                    this.axis
                        .tickFormat( (d: any, i: number) => {
-                          return d;
+                          return shortName(d);
                        })
                    break;
 
@@ -185,9 +186,10 @@ export class ChartAxesV2 {
                 default :
             }
 
+         
             this.axisGroup
                 .transition()
-                .duration(1000)
+                .duration(200)
                 .call(this.axis.scale(scale));
 
             // if(this.ctrlr.mapping.args && this.ctrlr.mapping.args[0] === "alternateTicks") {

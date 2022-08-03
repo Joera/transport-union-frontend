@@ -47,6 +47,7 @@
             <nav>
               <ul>
                 <li><button id="select-map-view" type="button">Map</button></li>
+                <li><button id="select-matrix-view" type="button">Matrix</button></li>
                 <li><button id="select-chords-view" type="button">Chords</button></li>
                 <li><button id="select-network-view" type="button">Network</button></li>
 
@@ -75,6 +76,9 @@
 
             <section id="map-view"></section>
             <div id="rug"></div>
+            <section id="matrix-view">
+              <table id="matrix-table"><thead></thead><tbody></tbody></table>
+            </section>
             <section id="chords-view"></section>
             <section id="network-view"></section>
 
@@ -87,9 +91,11 @@
     <aside id="network-pane">
       <div>
         <table id="network-table" style="display:none;">
-          <thead><td>Name</td><td>ID</td><td>address</td><td>city</td></thead>
+          <thead><td></td><td>Name</td><td>ID</td><td>address</td><td>city</td><td></td></thead>
           <tbody>
               <tr>
+                <td><span></span></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

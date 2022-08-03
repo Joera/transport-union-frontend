@@ -4,7 +4,8 @@ import { IMainController } from "./main.controller";
 export interface ITableController {
 
     el: HTMLTableElement;
-    update: () => void
+    update: () => void;
+    signalExplorer: (peerID: string) => void;
 }
 
 export class TableController implements ITableController {
@@ -31,7 +32,7 @@ export class TableController implements ITableController {
             if(hasRow) {
 
                 if(peer.location) {
-                    (hasRow.querySelector('td:nth-of-type(4)') as HTMLTableCellElement).innerText = peer.location.city;
+                    (hasRow.querySelector('td:nth-of-type(5)') as HTMLTableCellElement).innerText = peer.location.city;
                 }
 
             } else {
@@ -42,23 +43,54 @@ export class TableController implements ITableController {
 
                 let name = matchPeerName(peer.peerId);
                 if(name != undefined) {
-                    (newRow.querySelector('td') as HTMLTableCellElement).innerText = name;
+                    (newRow.querySelector('td:nth-of-type(2)') as HTMLTableCellElement).innerText = name;
                 }
-                let s : string = "..." + peer.peerId.substring(16);
-                (newRow.querySelector('td:nth-of-type(2)') as HTMLTableCellElement).innerText = s;
+                let s : string = "..." + peer.peerId.substring(24);
+                (newRow.querySelector('td:nth-of-type(3)') as HTMLTableCellElement).innerText = s;
 
                 if(peer.addresses.length > 0) {
-                    (newRow.querySelector('td:nth-of-type(3)') as HTMLTableCellElement).innerText = this.deconstructMultiaddress(peer.addresses[0]).location;
+                    (newRow.querySelector('td:nth-of-type(4)') as HTMLTableCellElement).innerText = peer.public ? this.deconstructMultiaddress(peer.addresses[0]).location : "private";
                 }
 
                 if(peer.location) {
-                    (newRow.querySelector('td:nth-of-type(4)') as HTMLTableCellElement).innerText = peer.location.city;
+                    (newRow.querySelector('td:nth-of-type(5)') as HTMLTableCellElement).innerText = peer.location.city;
                 }
+
+                if(peer.location) {
+                    (newRow.querySelector('td:nth-of-type(6)') as HTMLTableCellElement).innerText = peer.tested_connections.length.toString();
+                }
+
                 tableBody.insertBefore(newRow,emptyRow);
             }
         }
    
 
+
+    }
+
+    signalExplorer(peerId: string) {
+    
+        let rows = this.el.querySelectorAll("tbody tr");
+
+        for (let row of rows) {
+
+            if(this.main.exploration.explored.indexOf(row.id.substring(3)) > -1 ) {
+
+                (row.querySelector("td span") as HTMLElement).style.borderColor = "#dedede";
+                (row.querySelector("td span") as HTMLElement).style.backgroundColor = "#dedede"
+
+            } else if(row.id === 'id_' + peerId ) {
+
+                (row.querySelector("td span") as HTMLElement).style.borderColor = "black";
+                (row.querySelector("td span") as HTMLElement).style.backgroundColor = "white";
+
+            } else {
+
+                (row.querySelector("td span") as HTMLElement).style.borderColor = "#dedede";
+                (row.querySelector("td span") as HTMLElement).style.backgroundColor = "white";
+            }
+
+        }
 
     }
 

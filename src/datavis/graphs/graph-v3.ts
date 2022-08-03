@@ -26,6 +26,8 @@ export interface IGraphControllerV3 {
     scales: any;
     axes: any;
     parameters: any;
+
+    update: (data: any, update: boolean) => void
 }
 
 
@@ -140,6 +142,8 @@ export class GraphControllerV3 implements IGraphControllerV3  {
         //     this.htmlSegment.draw(segment);
         // }
     }
+
+    update(data: any, update: boolean) { }
 
     _addScale(slug: string, type: string, direction: string, parameter?: string) {
 

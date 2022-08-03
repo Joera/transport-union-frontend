@@ -16,7 +16,7 @@ export default class ChordElements  {
     chord: any;
 
     constructor(
-        private mainController: any,
+        private main: any,
         private ctrlr: any
     ){
 
@@ -26,20 +26,20 @@ export default class ChordElements  {
             .attr("fill-opacity", 0.75);
      } 
 
-    draw(data: NetworkData, chords: any) {
+    draw(nodes: GraphNode[], chords: any) {
 
-        const sats = this.mainController.dataStore.satelites.map(  (s: any) => s.id);
+     //   const sats = this.mainController.dataStore.satelites.map(  (s: any) => s.id);
 
-        let peerChords = chords.filter( (chord: any) => {
-            return sats.indexOf(chord.source.index) < 0 && sats.indexOf(chord.target.index) < 0
-        })
+        // let peerChords = chords.filter( (chord: any) => {
+        //     return sats.indexOf(chord.source.index) < 0 && sats.indexOf(chord.target.index) < 0
+        // })
 
         let self = this; 
-        const matchPeerSlugByIndex = this.mainController.dataStore.matchPeerSlugByIndex.bind(this.mainController.dataStore);
+        const matchPeerSlugByIndex = this.main.graphData.matchPeerSlugByIndex.bind(this.main.graphData);
 
         this.ctrlr.svg.layers.data.select("g.chords")
             .selectAll("path.chord")
-            .data(peerChords, (d:any) => "s-" + matchPeerSlugByIndex(d.source.index) + "_t-" + matchPeerSlugByIndex(d.target.index))
+            .data(chords, (d:any) => "s-" + matchPeerSlugByIndex(d.source.index) + "_t-" + matchPeerSlugByIndex(d.target.index))
             .join( 
                 (enter: any) => 
                     
@@ -51,7 +51,7 @@ export default class ChordElements  {
                         .style("mix-blend-mode", "multiply")
                         .attr("fill", (d: any) => {
                 
-                            let node = self.mainController.dataStore.nodes[d.source.index];
+                            let node = self.main.graphData.nodes[d.source.index];
 
                             if (node && node.role === "relayPeer") {
                                 return colours.orange[0]; 
@@ -65,12 +65,14 @@ export default class ChordElements  {
                            //  is dat de this.chord.group  of de data store ? 
                                               
                            // onderstaand is sowieso verkeerd
-                            let source = self.mainController.dataStore.nodes[d.source.index];
-                            let target = self.mainController.dataStore.nodes[d.target.index];
+                            let source = self.main.graphData.nodes[d.source.index];
+                            let target = self.main.graphData.nodes[d.target.index];
                                 
-                            if (source && target) {
-                                return (source.connected && target.connected) ? .333 : 0;
-                            }
+                            // if (source && target) {
+                            //     return (source.connected && target.connected) ? .333 : 0;
+                            // }
+
+                            return 0.33;
                         })
                 ,
                 (update: any) => {

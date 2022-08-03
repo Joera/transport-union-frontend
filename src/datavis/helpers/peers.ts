@@ -45,8 +45,17 @@ export function matchPeerName(id: string) {
         return "Stage " + s
     } else {
         return undefined
-    }
+    } 
+}
 
-   
+export function shortName(peerId: string) {
+
+    let name = matchPeerSlug(peerId);  
+                                
+    if(name != undefined) {
+        return (name.length > 3) ? ".." + name.substr(name.length - 5) : name;
+    } else {
+        return "";
+    }
 }
 

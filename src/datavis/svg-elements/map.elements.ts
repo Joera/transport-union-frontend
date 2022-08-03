@@ -48,7 +48,7 @@ export default class MapElements   {
             .join("circle")
             // .attr("class", (d: any, i: number) => slugify(d.properties.gemeentenaam))
             .attr("r", 2)
-            .attr("fill", "#ff0000")
+            .attr("fill", "#000")
             // .attr("stroke", "#fff")
             ;
 

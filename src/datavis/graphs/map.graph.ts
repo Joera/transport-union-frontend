@@ -6,10 +6,10 @@ import { MapElements } from "../svg-elements/module";
 import { slugify } from "../utils/slugify.utils";
 import { DataPart, GraphData } from "../types/data";
 import { GraphControllerV3 } from "./graph-v3";
-import { IGraphMappingV3 } from "../types/mapping";
+//import { IGraphMappingV3 } from "../types/mapping";
 // import { flattenColumn } from "../d3-services/_helpers";
 
-
+//
 export default class Map extends GraphControllerV3 {
 
     topojsonObject: any;

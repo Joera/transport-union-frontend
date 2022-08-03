@@ -7,6 +7,7 @@ import { GraphNode, GraphLink, Satelite } from "./interfaces";
 export default class GraphDataService {
 
     _nodes: GraphNode[];
+    _neighbors: GraphLink[];
     _links: GraphLink[];
     _satelites: Satelite[];
     _connections: GraphLink[];
@@ -16,7 +17,9 @@ export default class GraphDataService {
         
         ) {
             this._nodes  = [];
-            this._links = [];
+            this._neighbors = [];
+            this._connections = [];
+
         }
 
     findNode(peerId: string) {
@@ -39,8 +42,12 @@ export default class GraphDataService {
         this._nodes.push(node);
     }
 
-    set link(link: GraphLink) {
-        this._links.push(link);        
+    set neighbor(neighbor: GraphLink) {
+        this._neighbors.push(neighbor);        
+    }
+
+    set connection(connection: GraphLink) {
+        this._connections.push(connection);        
     }
 
     // set nodes(nodes: GraphNode[]) {
@@ -64,9 +71,14 @@ export default class GraphDataService {
         return this._nodes;
     }
 
-    get links() {
+    get neighbors() {
 
-        return this._links;
+        return this._neighbors;
+    }
+
+    get connections() {
+
+        return this._connections;
     }
 
     // get peers() {
@@ -85,7 +97,7 @@ export default class GraphDataService {
 
     trimLinks() {
 
-        this._links = this._links.filter( (l) => {
+        this._connections = this._connections.filter( (l) => {
 
             return l.source !== l.target;
         })
@@ -95,7 +107,7 @@ export default class GraphDataService {
 
         this.main.chordDiagram.update({
             nodes: this._nodes,
-            links: this._links
+            connections: this._connections
         }, restartSimulation)
     }
 
@@ -137,12 +149,12 @@ export default class GraphDataService {
 
         const sourceNode = this.findNode(source);
 
-        const index = this.number_of_nodes;
+        const i = this.number_of_nodes;
 
         if (peer !== source && this.findNode(peer) == undefined) {
 
             this.node = {
-                id: index,
+                index: i,
                 peerId: peer,
                 selected: false
             };
@@ -150,15 +162,47 @@ export default class GraphDataService {
 
         if (sourceNode != undefined ) {
 
-            this.link = {
-                source: sourceNode.id,
-                target: index
+            this.connection = {
+                source: sourceNode.index,
+                target: i
             }
             
             
             // this.updateGraph(true);
         }
 
+    }
+
+    addNeighbor(source: string, target: string)  {
+
+        const sourceNode = this.findNode(source);
+        const targetNode = this.findNode(target);
+
+        if(sourceNode != undefined && targetNode != undefined) {
+            
+            this.neighbor = {
+                source: sourceNode.index,
+                target: targetNode.index
+            }
+        } else {
+            console.log(target + ' is unknown')
+        }
+    }
+
+    addConnection(source: string, target: string)  {
+
+        const sourceNode = this.findNode(source);
+        const targetNode = this.findNode(target);
+
+        if(sourceNode != undefined && targetNode != undefined) {
+            
+            this.connection = {
+                source: sourceNode.index,
+                target: targetNode.index
+            }
+        } else {
+            console.log(target + ' is unknown')
+        }
     }
 
 }

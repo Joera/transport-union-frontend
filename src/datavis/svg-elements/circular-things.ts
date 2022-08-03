@@ -64,7 +64,7 @@ export class CircularThings {
 
         function arcStartAngle(d: any) {
 
-            let index = items.map ( i => i.id).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
+            let index = items.map ( i => i.index).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
             let division = minItems > 0 ? (2 * Math.PI) / minItems : 0
             let angle = division * (index - 0.5);
 
@@ -73,7 +73,7 @@ export class CircularThings {
     
         function arcEndAngle(d: any) {
 
-            let index = items.map ( i => i.id).indexOf(d.index); //d.index > 0 ? d.index - 1 : 0;
+            let index = items.map ( i => i.index).indexOf(d.index); //d.index > 0 ? d.index - 1 : 0;
             let division = minItems > 0 ? (2 * Math.PI) / minItems : 0
             let angle = division * (index + 0.5);
 
@@ -96,7 +96,7 @@ export class CircularThings {
 
         function startAngle(d: any, i: number, arr: any) {
             
-            let index = items.map ( i => i.id).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
+            let index = items.map ( i => i.index).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
             let division = minItems > 0 ? (2 * Math.PI) / minItems : 0
             let angle = division * (index - 0.5);
 
@@ -105,7 +105,7 @@ export class CircularThings {
 
         function endAngle(d: any) {
 
-            let index = items.map ( i => i.id).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
+            let index = items.map ( i => i.index).indexOf(d.index); // d.index > 0 ? d.index - 1 : 0; // 
             let division = minItems > 0 ? (2 * Math.PI) / minItems : 0
             let angle = division * (index + 0.5);
 
@@ -175,7 +175,7 @@ export class CircularThings {
     labels(data: NetworkData, d: any) {
 
         let  { items, minItems } = this._filterNodes();
-        let index = items.map ( i => i.id).indexOf(d.index);
+        let index = items.map ( i => i.index).indexOf(d.index);
 
         let division = minItems > 0 ? (2 * Math.PI) / minItems : 0
         let angle = division * index;
@@ -199,7 +199,7 @@ export class CircularThings {
 
         //     case "core": 
                 items = this.ctrlr.main.graphData.nodes;
-                minItems = items.length
+                minItems = items.length - 1;
             //     break;
             // case "satelite":
             //     items = this.ctrlr.mainController.dataStore.satelites;

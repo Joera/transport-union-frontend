@@ -3,7 +3,10 @@ import { GetPeerInfoResult } from "./_aqua/export"
 
 export interface Peer {
     peerId: string,
+    public: boolean,
     addresses?: string[],
+    kademlia_neighbors?: string[],
+    tested_connections?: string[],
     name?: string,
     location?: any,
     info?: PeerInfo,
@@ -12,7 +15,7 @@ export interface Peer {
 }
 
 export interface GraphNode   {
-    id: number,
+    index: number,
     peerId: string,
     fx?: number,
     fy?: number,
@@ -51,6 +54,11 @@ export interface NetworkData {
     nodes: GraphNode[],
     links: GraphLink[],
     matrix?: number[][]
+}
+
+export interface MatrixData {
+    nodes: GraphNode[],
+    matrix: number[][]
 }
 
 export interface PeerInfo {
