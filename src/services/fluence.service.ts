@@ -82,16 +82,16 @@ export default class FluenceService implements IFluenceService {
 
     _selectRelay(index: number)  {
 
-        if(index == 5) {
+        // if(index == 5) {
 
-            return {
-                multiaddr: '/ip4/143.176.14.172/tcp/7770/p2p/12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
-                peerId: '12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
-            }
+        //     return {
+        //         multiaddr: '/ip4/143.176.14.172/tcp/7770/p2p/12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
+        //         peerId: '12D3KooWSsWDsonjEnJcqFp7WwfTYCbYKG43dGw9xd97eVKVHsEM',
+        //     }
 
-        } else {
+        // } else {
             return krasnodar[index];
-        }    
+       // }    
     }
 
     async neighborhood(sourcePeerId: string) {
